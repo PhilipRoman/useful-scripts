@@ -1,0 +1,14 @@
+# Runs a Lua 5.3 code generation script
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: superpaintman/lua:5.3
+  script:
+    - which lua5.3 || which lua
+    - mkdir build
+    - lua ./codegen.lua
+  artifacts:
+    build/

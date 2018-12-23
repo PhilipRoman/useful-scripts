@@ -1,0 +1,68 @@
+/**
+ * Sample Gradle build file which enables writing production code in mixed Java/Kotlin as well as tests in Groovy.
+ * Sources are located directly inside "src" folder, tests in "test" folder.
+ */
+
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'application'
+apply plugin: 'groovy'
+
+buildscript {
+    ext.kotlin_version = "1.3.10"
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+    // Enable tests written in Groovy
+    test {
+        groovy {
+            srcDir 'test'
+        }
+    }
+}
+
+mainClassName = 'org.project.MainClass'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.project.MainClass'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+dependencies {
+    // Logging via Logback behind SLF4J
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.8.0-beta2'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.3.0-alpha4'
+    compile group: 'ch.qos.logback', name: 'logback-core', version: '1.3.0-alpha4'
+    // JetBrains annotations such as @Nullable, @NotNull, @Contract, etc.
+    compile group: 'org.jetbrains', name: 'annotations', version: '16.0.2'
+    // Groovy language support
+    compile 'org.codehaus.groovy:groovy-all:2.5.4'
+    // Unit testing library
+    testCompile group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
+    // Kotlin language support
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // JMH benchmarking library
+    compile group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.19'
+    compile group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.19'
+}
+
+repositories {
+    mavenCentral()
+    // Enables getting dependencies directly from GitHub repositories
+    maven { url 'https://jitpack.io' }
+}

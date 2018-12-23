@@ -1,0 +1,24 @@
+# Upload all files in a folder from CI server to a remote location using SSH
+
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  image: kroniak/ssh-client
+  when: manual
+  dependencies:
+    # Add any folders from previous stages you wish to upload
+    - build
+  only:
+    - master
+  script:
+    # Make sure you set $USERNAME, $HOST and $SSH_PRIVATE_KEY
+    - scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./local_folder $USERNAME@$HOST:/remote_folder
+  before_script:
+    # the following script is taken from https://docs.gitlab.com/ee/ci/ssh_keys/README.html
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh

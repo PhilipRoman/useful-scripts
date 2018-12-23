@@ -1,0 +1,32 @@
+# Compiles protocol buffers found in "proto/" to Dart and Java targets
+# Generated Dart files will be put in "dart/lib/gen/"
+# Generated Java files will be put in "java/gen/"
+
+stages:
+  - codegen
+
+codegen:
+  stage: codegen
+  image: google/dart
+  script:
+    #- apt-get update && apt-get -y install protobuf-compiler
+    # need to install protoc manually because apt doesn't have proto 3
+    # script taken from http://google.github.io/proto-lens/installing-protoc.html
+    - PROTOC_ZIP=protoc-3.3.0-linux-x86_64.zip
+    - curl -OL https://github.com/google/protobuf/releases/download/v3.3.0/$PROTOC_ZIP
+    # We don't have 'unzip' on the server!
+    - apt-get update && apt-get -y install unzip
+    - unzip -o $PROTOC_ZIP -d /usr/local bin/protoc
+    - rm -f $PROTOC_ZIP
+    # add activated dart tools to path
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
+    - pub global activate protoc_plugin
+    - mkdir dart/lib/gen
+    - mkdir java/gen
+    - proto_cmd="protoc --dart_out=dart/lib/gen --java_out=java/gen --proto_path=proto"
+    # make sure there is at least 1 .proto file in "proto/"
+    - for proto_file in proto/*.proto; do $proto_cmd $proto_file; done
+  artifacts:
+    paths:
+      - dart/lib/gen
+      - java/gen

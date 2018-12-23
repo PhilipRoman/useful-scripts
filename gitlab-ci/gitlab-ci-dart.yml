@@ -1,0 +1,19 @@
+# builds a frontend (JS target) Dart program using Dart 2 tools (webdev)
+
+stages:
+  - build
+
+build_dart:
+  stage: build
+  image: google/dart
+  dependencies:
+    - codegen
+  script:
+    - pub get
+    # add activated dart tools to path
+    - export PATH="$PATH":"$HOME/.pub-cache/bin"
+    - pub global activate webdev
+    - webdev build
+  artifacts:
+    paths:
+      - /build/
