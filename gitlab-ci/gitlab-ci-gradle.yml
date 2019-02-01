@@ -5,9 +5,10 @@ stages:
 
 build:
   stage: build
-  image: gradle:jdk10-slim
+  image: gradle:5.1-jdk11-slim
   script:
     - java -version
     # Uncomment if you want to build using gradle wrapper
     # - chmod +x gradlew
+    # ./gradlew build
     - gradle build

@@ -5,7 +5,7 @@ stages:
 
 build_dart:
   stage: build
-  image: google/dart
+  image: google/dart:2.1.0
   dependencies:
     - codegen
   script:

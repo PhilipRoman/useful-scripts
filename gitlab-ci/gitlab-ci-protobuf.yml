@@ -7,7 +7,7 @@ stages:
 
 codegen:
   stage: codegen
-  image: google/dart
+  image: google/dart:2.1.0
   script:
     #- apt-get update && apt-get -y install protobuf-compiler
     # need to install protoc manually because apt doesn't have proto 3
