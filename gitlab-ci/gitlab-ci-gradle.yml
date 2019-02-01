@@ -12,3 +12,9 @@ build:
     # - chmod +x gradlew
     # ./gradlew build
     - gradle build
+  artifacts:
+    reports:
+      junit:
+        - build/test-results/test/TEST-*.xml
+      paths:
+        build/reports/
