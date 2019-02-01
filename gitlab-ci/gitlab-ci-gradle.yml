@@ -17,4 +17,4 @@ build:
       junit:
         - build/test-results/test/TEST-*.xml
       paths:
-        build/reports/
+        - build/reports/
