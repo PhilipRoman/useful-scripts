@@ -1,0 +1,59 @@
+#!/usr/bin/lua5.3
+
+--[[
+	This script is meant to be used on Windows Subsystem for Linux
+
+	I have setup a slideshow as my Windows 10 desktop background. The Windows accent color is automatically picked
+	from the currently shown image. Since I usually sit in TMUX during my bash sessions, I created this script to 
+	automatically synchronize the TMUX status bar color with my Windows accent color (which is shown on window title
+	bars).
+	
+	Add the following line to your .bashrc to run this script in background:
+
+	bash -c color-updater >> ~/.color-updater-log &
+
+	This script depends on the following tools being on path:
+		lua5.3 (should work on older versions too)
+		reg.exe
+		sleep
+		tmux
+]]
+
+local REGISTRY_PATH = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\DWM"
+local REGISTRY_COLOR_KEY = "AccentColor"
+
+-- Returns the current accent color as a hex string in form of RRGGBB
+local function query_windows_color()
+	local regquery = io.popen("reg.exe query '"..REGISTRY_PATH.."' /v '"..REGISTRY_COLOR_KEY.."'")
+
+	-- Windows registry hex colors are stored like this: 0x??BBGGRR (first 2 digits seem to be unused)
+	-- Note the unusual order of colors!
+	local blue, green, red = regquery:read("a"):match "0x..(..)(..)(..)"
+	regquery:close()
+
+	return red .. green .. blue
+end
+
+local function on_color_change(color)
+	-- This function will be called every time Windows accent color changes
+	-- If you wish to colorize more things, you can add your own actions here
+	os.execute ('tmux set-option status-bg "#' .. color .. '"')	
+end
+
+local old_color = query_windows_color()
+-- as soon as this script is launched, update the tmux color for the first time
+on_color_change(old_color)
+
+while true do
+	local new_color = query_windows_color()
+	if old_color ~= new_color then
+		-- update color and sleep for a long duration
+		on_color_change(new_color)
+		-- the interval is 60 seconds because that's the maximum frequency of slideshow wallpaper updates
+		os.execute "sleep 59"
+		old_color = new_color
+	else
+		-- sleep for a short duration and try again
+		os.execute "sleep 0.5"
+	end
+end
